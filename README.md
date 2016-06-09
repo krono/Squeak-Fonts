@@ -6,4 +6,4 @@ python make_fonts.py
 ````
 For the full experience, file in `reloadDejaVu.st`
 
-<!-- -KTHXBYE ->
+<!-- KTHXBYE -->
