@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 print "Loading Renderer..."
@@ -12,7 +12,8 @@ def do(FONTS, SIZES):
             render(font, size, dark=False, MAX_UNICODE=0xFF)
             render(font, size, dark=True, MAX_UNICODE=0xFF)
 
-SIZES=[10, 14, 19, 22, 26, 32]
+SIZES=[10, 14, 19, 22, 27, 32]
+# 4,5,3,5,5
 FONTS=[
     'DejaVu/DejaVuSans-Bold.ttf',
     'DejaVu/DejaVuSans-BoldOblique.ttf',

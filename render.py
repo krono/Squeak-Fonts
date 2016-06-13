@@ -62,7 +62,7 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
     heightForReal = ascentForReal + -descentForReal
 
     # derrive from desired pixel size
-    font_size = height / heightForReal
+    font_size = round(height / heightForReal)
     # derrive from new size
     descent = descentForReal * font_size
     PerEm = PerEmForReal / font_size
@@ -131,13 +131,16 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
 
             if height <= 10: #ok this is too tiny.
                 pixel_advance = int(math.ceil(x_advance))
+                y = math.floor(-descent)
             else:
                 pixel_advance = int(round(x_advance))
+                y = math.ceil(-descent)
             jitter = (pixel_advance - x_advance) / 2.0
             origin_x = x + add_left + jitter
 
             new_glyphindices.append(glyphindices[glyphindex])
-            positions.append((x, CGPoint(origin_x, math.ceil(-descent))))
+            positions.append((x, CGPoint(origin_x, y)))
+            # positions.append((x, CGPoint(origin_x, (-descent))))
             x += pixel_advance
             max_advance = max(max_advance, pixel_advance)
         xTable.append(x) # Fin
