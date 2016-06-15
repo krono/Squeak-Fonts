@@ -13,10 +13,10 @@ DEBUG=False
 # DEBUG=True
 
 def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
-    # Haha.
-    # import ctypes, ctypes.util
-    # CG = ctypes.cdll.LoadLibrary(ctypes.util.find_library('CoreGraphics'))
-    # CG.CGContextSetFontSmoothingBackgroundColor.restype = None
+    # # Haha.
+    import ctypes, ctypes.util
+    CG = ctypes.cdll.LoadLibrary(ctypes.util.find_library('CoreGraphics'))
+    CG.CGContextSetFontSmoothingBackgroundColor.restype = None
 
     bitPerComponent = 8
     componentsPerByte = 1
@@ -157,7 +157,10 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
     #########################################################################
 
     colorspace = CGColorSpaceCreateDeviceRGB()
-    context = CGBitmapContextCreate(None, width, height, bitPerComponent, width * bytePerPixel, colorspace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Host)
+    if dark:
+        context = CGBitmapContextCreate(None, width, height, bitPerComponent, width * bytePerPixel, colorspace, kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host)
+    else:
+        context = CGBitmapContextCreate(None, width, height, bitPerComponent, width * bytePerPixel, colorspace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Host)
 
     CGContextSetTextMatrix(context, CGAffineTransformIdentity)
 
@@ -183,9 +186,16 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
     bg = BLACK if dark else WHITE
     fg = WHITE if dark else BLACK
 
-    # CG.CGContextSetFontSmoothingBackgroundColor(context.__c_void_p__(), bg.__c_void_p__())
-    CGContextSetFillColorWithColor(context, bg)
-    CGContextFillRect(context, NSMakeRect(0,0,width,height))
+    GRAY = CGColorCreateGenericGray(0.25, 1.0)
+    spbg = GRAY if dark else bg
+
+
+    if dark:
+        CGContextClearRect(context, NSMakeRect(0,0,width,height))
+        CG.CGContextSetFontSmoothingBackgroundColor(context.__c_void_p__(), spbg.__c_void_p__())
+    else:
+        CGContextSetFillColorWithColor(context, bg)
+        CGContextFillRect(context, NSMakeRect(0,0,width,height))
 
     CGContextSetFont(context, graphicsFont)
     CGContextSetTextDrawingMode(context, kCGTextFill)
@@ -208,11 +218,6 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
                     CGContextSetStrokeColorWithColor(context, CGColorCreate(colorspace, [0.5,0.0,0.0,0.1]))
                     CGContextStrokeRect(context, clip_rect)
             CGContextShowGlyphsAtPositions(context, [glyph_index], [pos], 1)
-    # CGContextShowGlyphsAtPositions(
-    #     context, 
-    #     glyphindices,
-    #     positions,
-    #     len(glyphindices))
 
 
     ##########################################################################
@@ -250,7 +255,13 @@ def render(font_file, height=14, dark=False, MAX_UNICODE=0x23FF):
 
     if dark:
         from subprocess import call
-        call(['convert', filename_png, '-negate', filename_png])
+        call([
+            'convert',
+            '-background', 'White',
+            '-flatten',
+            filename_png,
+            '-negate', filename_png,
+              ])
 
     with open(filename_txt, 'w') as file_txt:
         print >> file_txt, ' '.join(map(str, sf0_header + xTable))
